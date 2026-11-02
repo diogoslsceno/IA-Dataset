@@ -1,0 +1,166 @@
+{
+  "vocabulario": {
+    "n_pares": 3456,
+    "n_turmas": 80,
+    "taxa_risco_estagnacao": 0.47337962962962965,
+    "regressao": {
+      "modelos": {
+        "Baseline (Média)": {
+          "RMSE": 9.595848853880005,
+          "MAE": 8.13691816177328,
+          "R2": -0.012157828468765387
+        },
+        "Ridge Regression": {
+          "RMSE": 6.2840160779893806,
+          "MAE": 4.715064330333654,
+          "R2": 0.5636758877785546
+        },
+        "Random Forest Regressor": {
+          "RMSE": 6.124960240673842,
+          "MAE": 4.603241101454142,
+          "R2": 0.5859901128930645
+        },
+        "Gradient Boosting Regressor": {
+          "RMSE": 6.136182524532163,
+          "MAE": 4.62068494645524,
+          "R2": 0.5845427961679327
+        }
+      },
+      "top_features": [
+        {
+          "feature": "total_pre",
+          "importance": 0.9427882773173779
+        },
+        {
+          "feature": "idade",
+          "importance": 0.02289592612650078
+        },
+        {
+          "feature": "sexo_pre_M",
+          "importance": 0.008288601453931956
+        },
+        {
+          "feature": "fase_Fase 3",
+          "importance": 0.006718138658161396
+        },
+        {
+          "feature": "zona_pre_Rural",
+          "importance": 0.004360516605910066
+        },
+        {
+          "feature": "cor_raca_pre_Não informado",
+          "importance": 0.003229362371053184
+        }
+      ]
+    },
+    "classificacao": {
+      "Baseline (Majoritária)": {
+        "Acuracia": 0.526655275647729,
+        "F1_Score": 0.0,
+        "ROC_AUC": 0.5
+      },
+      "Regressão Logística": {
+        "Acuracia": 0.579847725661519,
+        "F1_Score": 0.5248092030253347,
+        "ROC_AUC": 0.6169234205909545
+      },
+      "Árvore de Decisão": {
+        "Acuracia": 0.5561047272607706,
+        "F1_Score": 0.5357569067557156,
+        "ROC_AUC": 0.5885733338282668
+      },
+      "Random Forest Classifier": {
+        "Acuracia": 0.5769709294499666,
+        "F1_Score": 0.5326882825911952,
+        "ROC_AUC": 0.6115121195781853
+      },
+      "Gradient Boosting Classifier": {
+        "Acuracia": 0.5769637984279233,
+        "F1_Score": 0.5382681854438656,
+        "ROC_AUC": 0.6110649363396186
+      }
+    }
+  },
+  "tde": {
+    "n_pares": 3232,
+    "n_turmas": 85,
+    "taxa_risco_estagnacao": 0.53125,
+    "regressao": {
+      "modelos": {
+        "Baseline (Média)": {
+          "RMSE": 12.44040202222794,
+          "MAE": 10.735196204145163,
+          "R2": -0.02003172870589127
+        },
+        "Ridge Regression": {
+          "RMSE": 7.546415873175727,
+          "MAE": 5.660253566022911,
+          "R2": 0.6230634008684728
+        },
+        "Random Forest Regressor": {
+          "RMSE": 7.585303341725732,
+          "MAE": 5.648757822311564,
+          "R2": 0.6188948516695948
+        },
+        "Gradient Boosting Regressor": {
+          "RMSE": 7.592596896946968,
+          "MAE": 5.623494756260683,
+          "R2": 0.617762818277474
+        }
+      },
+      "top_features": [
+        {
+          "feature": "total_pre",
+          "importance": 0.8813027668985395
+        },
+        {
+          "feature": "fase_Fase 3",
+          "importance": 0.04212518012229417
+        },
+        {
+          "feature": "idade",
+          "importance": 0.025567123632135477
+        },
+        {
+          "feature": "fase_Fase 4",
+          "importance": 0.021647465147965724
+        },
+        {
+          "feature": "zona_pre_Urbana",
+          "importance": 0.007965005499273327
+        },
+        {
+          "feature": "distorcao_idade_serie",
+          "importance": 0.007717764737369692
+        }
+      ]
+    },
+    "classificacao": {
+      "Baseline (Majoritária)": {
+        "Acuracia": 0.5312325043903512,
+        "F1_Score": 0.693276133917353,
+        "ROC_AUC": 0.5
+      },
+      "Regressão Logística": {
+        "Acuracia": 0.6082974050272513,
+        "F1_Score": 0.6460635103870285,
+        "ROC_AUC": 0.6577431975670175
+      },
+      "Árvore de Decisão": {
+        "Acuracia": 0.6448122078083653,
+        "F1_Score": 0.6829978861171172,
+        "ROC_AUC": 0.6966385040146343
+      },
+      "Random Forest Classifier": {
+        "Acuracia": 0.6398629540484542,
+        "F1_Score": 0.6796577669388205,
+        "ROC_AUC": 0.7047073316745408
+      },
+      "Gradient Boosting Classifier": {
+        "Acuracia": 0.6581215517200129,
+        "F1_Score": 0.6794023735754273,
+        "ROC_AUC": 0.711974249798604
+      }
+    }
+  }
+}

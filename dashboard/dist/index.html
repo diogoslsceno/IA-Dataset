@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Visão Geral das avaliações de Vocabulário e TDE II.">
+  <title>Visão Geral</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="nav active" href="#visao-geral"><span>▦</span> Painel de análise</a>
+      <a class="nav" href="#comparacao"><span>◫</span> Pré e pós</a>
+      <a class="nav" href="#longitudinal"><span>⌁</span> Evolução</a>
+    </aside>
+    <main id="visao-geral">
+      <div class="content">
+        <div class="heading"><h1>Visão Geral</h1></div>
+        <section class="filters" aria-label="Filtros de análise">
+          <div class="filter-title"><span>⚑</span> Filtros <small>Os indicadores e gráficos atualizam automaticamente</small></div>
+          <div class="filter-grid">
+            <label>Escola<select id="school"><option value="">Todas as escolas</option></select></label>
+            <label>Turma<select id="classroom"><option value="">Todas as turmas</option></select></label>
+            <label>Categoria<select id="category"><option value="vocabulario">Vocabulário</option><option value="tde">TDE II · Escrita</option></select></label>
+            <label>Escala<select id="scale-mode"><option value="raw">Pontos brutos (0–40/50)</option><option value="percent">Normalizado (0–100%)</option></select></label>
+            <button id="clear" type="button">Limpar filtros ↺</button>
+          </div>
+        </section>
+        <div id="status" class="status" role="status">Carregando dados tratados…</div>
+        <section class="kpis" aria-label="Indicadores principais">
+          <article class="kpi"><div class="kpi-icon indigo">♙</div><span>Alunos únicos</span><strong id="kpi-students">—</strong><small>Identificadores distintos</small></article>
+          <article class="kpi"><div class="kpi-icon teal">▤</div><span>Turmas únicas</span><strong id="kpi-classes">—</strong><small>Escola + turma</small></article>
+          <article class="kpi"><div class="kpi-icon violet">◧</div><span>Avaliações Vocabulário</span><strong id="kpi-vocab">—</strong><small>Provas realizadas com escore</small></article>
+          <article class="kpi"><div class="kpi-icon amber">✎</div><span>Avaliações TDE II</span><strong id="kpi-tde">—</strong><small>Provas realizadas com escore</small></article>
+        </section>
+        <section class="grid-two" id="comparacao">
+          <article class="card"><div class="card-head"><div><div class="section-kicker">RESULTADOS</div><h2>Comparação pré e pós</h2><p>Média dos mesmos alunos com as duas avaliações na fase</p></div><span class="chip" id="scale-chip">0–50 pontos</span></div><div id="comparison" class="chart"></div><div class="card-foot" id="pair-note"></div><div class="card-foot" id="delta-dist" style="font-size:12px;color:var(--text-muted);border-top:1px dashed var(--border);padding-top:6px;margin-top:4px"></div></article>
+          <article class="card effect"><div class="card-head"><div><div class="section-kicker">IMPACTO</div><h2>Tamanho do efeito</h2><p>Diferença padronizada em pares completos</p></div></div><div class="effect-main"><div><span class="metric-label">d<sub>z</sub> de Cohen</span><strong id="effect-value">—</strong><span id="effect-label" class="effect-label">Sem dados suficientes</span></div><div class="effect-ring" id="effect-ring"><span id="effect-ring-value">—</span></div></div><div class="effect-detail" id="effect-detail"></div><div class="method">d<sub>z</sub> = média(Pós − Pré) / desvio padrão amostral das diferenças. Calculado apenas com pares do mesmo aluno e fase; valor indisponível se n &lt; 2 ou desvio = 0.</div></article>
+        </section>
+        <section class="grid-two lower">
+          <article class="card" id="longitudinal"><div class="card-head"><div><div class="section-kicker">TRAJETÓRIA</div><h2>Evolução longitudinal</h2><p>Mesmos alunos com pré e pós nas três fases</p></div></div><div id="trend" class="chart"></div><div class="card-foot" id="trend-note"></div></article>
+          <article class="card"><div class="card-head"><div><div class="section-kicker">EQUIDADE</div><h2>Perfil socioeconômico</h2><p>Média de desempenho por característica informada</p></div><select id="dimension" aria-label="Dimensão socioeconômica"><option value="zona">Zona</option><option value="cor_raca">Cor / raça</option><option value="sexo">Sexo</option><option value="modalidade">Modalidade</option></select></div><div id="socio" class="chart"></div><div class="card-foot" id="socio-note"></div></article>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

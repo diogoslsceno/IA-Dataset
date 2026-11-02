@@ -1,0 +1,24 @@
+{
+  "vocabulario": {
+    "arquivos": 90,
+    "linhas_lidas": 17290,
+    "duplicatas_resolvidas": 2393,
+    "duplicatas_com_escore_distinto": 57,
+    "avaliacoes_consolidadas": 11807,
+    "avaliacoes_realizadas": 8882,
+    "alunos_unicos": 2967,
+    "turmas_unicas": 113,
+    "replicas_detectadas": 0
+  },
+  "tde": {
+    "arquivos": 91,
+    "linhas_lidas": 32522,
+    "duplicatas_resolvidas": 9145,
+    "duplicatas_com_escore_distinto": 674,
+    "avaliacoes_consolidadas": 12516,
+    "avaliacoes_realizadas": 9049,
+    "alunos_unicos": 2969,
+    "turmas_unicas": 99,
+    "replicas_detectadas": 438
+  }
+}

@@ -1,0 +1,15 @@
+﻿dimensao;pergunta;indicador;instrumento;valor;nota
+Completude;Dados necessários presentes?;Proporção de itens respondidos nas aplicações observadas;vocabulario;1.0;Itens preenchidos entre os estudantes presentes
+Completude;Dados necessários presentes?;Proporção de provas completas entre as observadas;vocabulario;1.0;Alunos com todos os 50 itens respondidos
+Unicidade;Sem duplicatas indevidas?;Taxa de unicidade por (aluno, fase, momento);vocabulario;1.0;1.0 indica ausência total de duplicatas na base consolidada
+Validade;Dentro dos domínios esperados?;Proporção de registros com itens em domínio válido (0 ou 1);vocabulario;1.0;Escala dicotomizada unificada
+Consistência;Dados coerentes entre si?;Proporção de avaliações livres de cópias pré-pós idênticas;vocabulario;1.0;Réplicas da Fase 3 devidamente sinalizadas e tratadas
+Acurácia;Dados refletem a realidade?;Concordância exata da soma dos itens com o escore total;vocabulario;1.0;Consistência interna de escore 100%
+Temporalidade;Dados estão atualizados e datados?;Proporção de registros com fase e momento cronológicos definidos;vocabulario;1.0;Ciclo temporal completo 2023.2 a 2024.2
+Completude;Dados necessários presentes?;Proporção de itens respondidos nas aplicações observadas;tde;1.0;Itens preenchidos entre os estudantes presentes
+Completude;Dados necessários presentes?;Proporção de provas completas entre as observadas;tde;1.0;Alunos com todos os 40 itens respondidos
+Unicidade;Sem duplicatas indevidas?;Taxa de unicidade por (aluno, fase, momento);tde;1.0;1.0 indica ausência total de duplicatas na base consolidada
+Validade;Dentro dos domínios esperados?;Proporção de registros com itens em domínio válido (0 ou 1);tde;1.0;Escala dicotomizada unificada
+Consistência;Dados coerentes entre si?;Proporção de avaliações livres de cópias pré-pós idênticas;tde;0.965;Réplicas da Fase 3 devidamente sinalizadas e tratadas
+Acurácia;Dados refletem a realidade?;Concordância exata da soma dos itens com o escore total;tde;1.0;Consistência interna de escore 100%
+Temporalidade;Dados estão atualizados e datados?;Proporção de registros com fase e momento cronológicos definidos;tde;1.0;Ciclo temporal completo 2023.2 a 2024.2

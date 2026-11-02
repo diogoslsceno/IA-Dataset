@@ -1,0 +1,12 @@
+# Dependências do Projeto IA - Dataset (WordGen / NEES)
+#
+# NOTA DE PORTABILIDADE:
+# O Dashboard Web, o Servidor Integrado e o Chatbot com Modo Analítico utilizam
+# 100% da Biblioteca Padrão do Python (Standard Library) e rodam sem nenhuma instalação pip.
+#
+# As bibliotecas abaixo são opcionais e necessárias exclusivamente para a execução
+# dos cadernos científicos, scripts de Machine Learning e auditorias multidimensionais:
+
+pandas>=1.5.0
+numpy>=1.20.0
+scikit-learn>=1.2.0

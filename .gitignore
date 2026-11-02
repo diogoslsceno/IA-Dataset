@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches and checkpoints
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Virtual Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# Temporary files & backups
+*.bak
+*.tmp
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db

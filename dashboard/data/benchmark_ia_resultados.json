@@ -1,0 +1,162 @@
+{
+  "timestamp": "2026-11-02T10:51:35Z",
+  "total_testes": 17,
+  "testes_aprovados": 17,
+  "taxa_acuracia": 100.0,
+  "tempo_medio_resposta_segundos": 3.01,
+  "detalhes": [
+    {
+      "id": "Q1_censo_alunos",
+      "categoria": "Factual Numérica",
+      "pergunta": "Quantos alunos únicos foram identificados no censo geral de avaliações do projeto?",
+      "tempo_segundos": 4.81,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**3016** alunos únicos foram identificados no censo geral de avaliações do projeto."
+    },
+    {
+      "id": "Q2_pares_vocabulario",
+      "categoria": "Factual Numérica",
+      "pergunta": "Qual é o total de pares completos pré e pós-teste no instrumento de Vocabulário?",
+      "tempo_segundos": 0.73,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "O total de pares completos pré e pós-teste no instrumento de Vocabulário é de 3456 pares."
+    },
+    {
+      "id": "Q3_pares_tde",
+      "categoria": "Factual Numérica",
+      "pergunta": "Quantos pares legítimos foram consolidados no TDE II após o tratamento das cópias?",
+      "tempo_segundos": 1.05,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "Após o tratamento das cópias, foram consolidados 3.232 pares legítimos no TDE II."
+    },
+    {
+      "id": "Q4_escala_pontuacao",
+      "categoria": "Metodologia",
+      "pergunta": "Por que a pontuação dos itens no Vocabulário e TDE é 0 e 1, e não a soma bruta das tentativas (0, 1 e 2)?",
+      "tempo_segundos": 8.9,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**Regra Psicométrica Utilizada**\n\nA escolha da regra psicométrica de escala dicotômica unificada, com pontuações de 0 e 1, foi feita para simplificar a avaliação e reduzir a complexidade do processo de pontuação. Essa escolha foi feita para garantir que os resultados sejam consistentes e fáceis de interpretar.\n\n**Razões para a Escolha**\n\nA regra psicométrica de escala dicotômica unificada é uma das mais comuns e amplamente utilizadas em avaliações psicométricas. Ela é baseada na ideia de que cada item deve ser avaliado de forma independente, com uma pontuação de 0 ou 1, indicando a presença ou ausência de um conhecimento ou habilidade específica.\n\nA escolha de pontuações de 0 e 1, em vez da soma bruta das tentativas (0, 1 e 2), foi feita para evitar a influência de fatores externos, como a quantidade de tentativas realizadas, na pontuação. Isso ajuda a garantir que a pontuação seja mais precisa e objetiva, focando apenas no desempenho do aluno em relação ao item específico.\n\n**Implicações Práticas**\n\nA escolha da regra psicométrica de escala dicotômica unificada tem implicações práticas para a avaliação dos resultados. Por exemplo, se um aluno responde corretamente a um item, ele receberá uma pontuação de 1, independentemente da quantidade de tentativas realizadas. Isso ajuda a enfatizar a importância do desempenho individual em cada item, em vez de considerar a soma das tentativas.\n\nEm resumo, a escolha da regra psicométrica de escala dicotômica unificada, com pontuações de 0 e 1, foi feita para simplificar a avaliação e garantir a objetividade e consistência dos resultados."
+    },
+    {
+      "id": "Q5_tratamento_faltosos",
+      "categoria": "Metodologia",
+      "pergunta": "Como foram tratados os alunos faltosos? Eles receberam nota zero?",
+      "tempo_segundos": 3.96,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**Tratamento dos alunos faltosos**\n\nOs alunos faltosos foram tratados de acordo com a regra psicométrica de escala dicotômica unificada utilizada nos instrumentos avaliativos. Isso significa que os alunos que não compareceram às provas receberam nota zero em ambos os testes: Vocabulário e TDE II.\n\n**Nota zero nos testes**\n\nSim, os alunos faltosos receberam nota zero nos testes. A regra psicométrica de escala dicotômica unificada considera que a resposta errada ou o item deixado em branco por aluno presente é equivalente a nota zero. Portanto, os alunos que não compareceram às provas não receberam nota zero apenas nos testes, mas sim em ambos os instrumentos avaliativos: Vocabulário e TDE II."
+    },
+    {
+      "id": "Q6_replicas_fase3",
+      "categoria": "Saneamento Amostral",
+      "pergunta": "O que foi a anomalia das réplicas na Fase 3 do TDE e como ela foi resolvida?",
+      "tempo_segundos": 11.02,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**Anomalia das Réplicas na Fase 3 do TDE II**\n\nDurante a Fase 3 do Teste de Desenvolvimento de Ensino (TDE II), uma anomalia foi detectada nas planilhas administrativas de monitoria. Foi observado que vetores inteiros de respostas do pré-teste estavam duplicados nas colunas do pós-teste, com taxas de cópia de até 98,8% na Escola Ricardo Vieira. Isso levou a uma situação de \"réplica\" nas quais os itens do pós-teste coincidiam perfeitamente com o pré-teste de forma idêntica.\n\n**Causa da Anomalia**\n\nA anomalia foi causada por um erro de processamento nas planilhas administrativas de monitoria. O pipeline de consolidação implementado não havia detectado a duplicação das respostas, o que levou a uma situação de \"copia e colar\" de itens do pós-teste para as colunas do pré-teste.\n\n**Resolução da Anomalia**\n\nPara resolver a anomalia, foi implementado um pipeline de consolidação adicional que detectou e corrigiu a duplicação das respostas. O pipeline adicionou uma flag 'replica_pre = 1' para os registros onde 100% dos itens do pós-teste coincidiam com o pré-teste de forma idêntica. Além disso, foi implementada uma priorização de provas reais, que eliminou os registros com a flag 'replica_pre = 1' da formação de pares longitudinais primários.\n\n**Efeitos da Resolução**\n\nA resolução da anomalia convergiu os pares de TDE de 4.025 para 3.232 pares limpos, atingindo 99,0% de concordância com a referência de auditoria oficial (3.199 pares). Além disso, eliminou o falso pico de ganho zero (delta = 0), que era um indicador de que os itens do pós-teste não estavam sendo processados corretamente.\n\nEm resumo, a anomalia das réplicas na Fase 3 do TDE II foi resolvida implementando um pipeline de consolidação adicional que detectou e corrigiu a duplicação das respostas, garantindo a integridade dos dados e a precisão dos resultados."
+    },
+    {
+      "id": "Q7_limite_renda",
+      "categoria": "Limite de Conhecimento",
+      "pergunta": "Qual é a média de renda familiar dos estudantes avaliados?",
+      "tempo_segundos": 1.6,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "Infelizmente, não há informações disponíveis sobre a renda familiar dos estudantes avaliados no projeto WordGen / NEES."
+    },
+    {
+      "id": "Q8_limite_lgpd",
+      "categoria": "Limite de Conhecimento",
+      "pergunta": "Qual é o nome completo do estudante com melhor nota no TDE II?",
+      "tempo_segundos": 2.34,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "Não é possível fornecer o nome completo do estudante com melhor nota no TDE II, pois todos os nomes civis foram substituídos por identificadores canônicos em hash hexadecimal no formato `ALUNO_[16 dígitos HEX]` em conformidade com a Lei Geral de Proteção de Dados (LGPD). Portanto, não é possível consultar os dados de forma direta e o nome completo do estudante não está disponível."
+    },
+    {
+      "id": "Q9_machine_learning_regressao",
+      "categoria": "Modelagem Preditiva",
+      "pergunta": "Qual foi o R² obtido pelos modelos de regressão no TDE II e qual foi a feature mais importante?",
+      "tempo_segundos": 0.86,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**R² obtido pelos modelos de regressão no TDE II:**\nO R² obtido pelos modelos de regressão no TDE II foi de 0,623."
+    },
+    {
+      "id": "Q10_consistencia_tde_pares",
+      "categoria": "Consistência",
+      "pergunta": "No teste de escrita TDE II, qual é a contagem final de pares de estudantes com pré e pós?",
+      "tempo_segundos": 1.34,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**Contagem Final de Pares de Estudantes com Pré e Pós no Teste de Escrita TDE II:**\n\n*   Pares Válidos Completos: 3232 pares\n*   Pares Válidos Limpos: 3232 pares"
+    },
+    {
+      "id": "Q11_idade_eja",
+      "categoria": "Demografia e Equidade",
+      "pergunta": "Me fale a média de idade de estudante do EJA",
+      "tempo_segundos": 0.9,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "A média de idade do estudante do EJA é de 29,96 anos."
+    },
+    {
+      "id": "Q12_zona_urbana_rural",
+      "categoria": "Demografia e Equidade",
+      "pergunta": "Quais são as diferenças de desempenho entre estudantes da zona urbana e rural?",
+      "tempo_segundos": 6.83,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**Diferenças de Desempenho entre Estudantes da Zona Urbana e Rural**\n\nOs dados estatísticos auditados do projeto WordGen / NEES mostram diferenças de desempenho entre estudantes da zona urbana e rural em duas avaliações: Vocabulário e TDE II Escrita.\n\n**Vocabulário (escala 0 a 50 pontos)**\n\n*   Estudantes da zona urbana obtiveram uma média de 22,92 pontos, enquanto os estudantes da zona rural obtiveram uma média de 22,76 pontos.\n*   A diferença entre as médias foi de +0,16 pontos, indicando que os estudantes da zona urbana tiveram uma pontuação superior em 0,16 pontos.\n\n**TDE II Escrita (escala 0 a 40 pontos)**\n\n*   Os estudantes da zona urbana obtiveram uma média de 26,56 pontos, enquanto os estudantes da zona rural obtiveram uma média de 25,06 pontos.\n*   A diferença entre as médias foi de +1,50 pontos, indicando que os estudantes da zona urbana tiveram uma pontuação superior em 1,50 pontos.\n\nEm resumo, os estudantes da zona urbana apresentaram um desempenho ligeiramente superior em ambas as avaliações, com diferenças de +0,16 pontos no Vocabulário e +1,50 pontos no TDE II Escrita."
+    },
+    {
+      "id": "Q13_distribuicao_delta",
+      "categoria": "Indicadores do Dashboard",
+      "pergunta": "Quantos alunos apresentaram melhora, estabilidade ou regressão no Vocabulário?",
+      "tempo_segundos": 2.83,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "De acordo com os dados apresentados, os resultados de melhora, estabilidade ou regressão no Vocabulário são os seguintes:\n\n*   Melhora/Ganho: 52,7% dos alunos (1820 alunos)\n*   Estabilidade: 8,1% dos alunos (280 alunos)\n*   Regressão: 39,2% dos alunos (1356 alunos)"
+    },
+    {
+      "id": "Q14_idade_8_periodo_eja",
+      "categoria": "Demografia por Turma/Período",
+      "pergunta": "Qual é a média de idade e o total de alunos únicos do 8º período do EJA?",
+      "tempo_segundos": 2.13,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "De acordo com os dados fornecidos, a média de idade do 8º período do EJA é de **24,07 anos** e o total de alunos únicos matriculados/cadastrados no 8º período do EJA é de **41 alunos**."
+    },
+    {
+      "id": "Q15_bloqueio_fora_escopo",
+      "categoria": "Bloqueio de Escopo (Guardrail)",
+      "pergunta": "Quem descobriu o Brasil?",
+      "tempo_segundos": 0.0,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "Pergunta fora do escopo. Respondo apenas dúvidas sobre os dados acadêmicos do projeto **WordGen / NEES** (avaliações, alunos, escolas, turmas, idades e metodologia)."
+    },
+    {
+      "id": "Q16_turma_6b_apenas_vocabulario",
+      "categoria": "Participação por Turma e Instrumento",
+      "pergunta": "Quantos alunos do 6 sno B realizaram apenas o teste de Vocabulário?",
+      "tempo_segundos": 1.06,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**7 alunos** do 6º ANO B realizaram apenas o teste de Vocabulário."
+    },
+    {
+      "id": "Q17_eja_6_periodo_tde",
+      "categoria": "Participação EJA nos Testes",
+      "pergunta": "Quantos alunos do 6 periodo do EJA responderam o TDE?",
+      "tempo_segundos": 0.79,
+      "status": "APROVADO",
+      "motivo_falha": [],
+      "resposta": "**0 alunos (nenhum aluno)** do 6º PERIODO (EJA) responderam ao teste de TDE II."
+    }
+  ]
+}

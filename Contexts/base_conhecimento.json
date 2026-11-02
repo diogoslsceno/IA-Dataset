@@ -1,0 +1,44 @@
+[
+  {
+    "id": "visao_geral_projeto",
+    "categoria": "Visão Geral",
+    "titulo": "Projeto WordGen / NEES - Avaliações Educacionais",
+    "conteudo": "O projeto analisa o desempenho escolar de estudantes do Ensino Fundamental II (6º ao 9º ano) e EJA na rede municipal de ensino, acompanhados ao longo de três fases: Fase 2 (2023.2), Fase 3 (2024.1) e Fase 4 (2024.2). O censo oficial auditado comprova 3.016 alunos únicos cadastrados nas avaliações através do identificador anonimizado canônico (ALUNO_[HEX]), dos quais 2.673 realizaram ao menos um teste e 343 faltaram em todas as aplicações. Foram avaliadas 6 escolas municipais principais: EMEB Natanael da Silva (NASI), EMEB Padre Anchieta (PEAN), EMEF Padre José dos Santos Mousinho (PJSM), EMEB Professora Maria Queiroz Ferro (PMQF), EMEB Professor Ricardo Vieira de Lima (PRVL) e EMEB Expedito Porfírio dos Santos (VEXP)."
+  },
+  {
+    "id": "instrumentos_avaliativos",
+    "categoria": "Metodologia",
+    "titulo": "Instrumentos Avaliativos: Vocabulário e TDE II",
+    "conteudo": "Foram aplicados dois instrumentos independentes: 1. Avaliação de Vocabulário: Contém 50 itens (Q1 a Q50). Pontuação máxima de 50 pontos. 2. Teste de Desempenho Escolar II (TDE II - Subteste de Escrita): Contém 40 itens (P1 a P40). Pontuação máxima de 40 pontos. Ambos os instrumentos utilizam a regra psicométrica de escala dicotômica unificada: nota 0 para resposta errada ou item deixado em branco por aluno presente; nota 1 para qualquer acerto (seja na primeira ou em tentativas posteriores). A soma bruta de códigos de tentativa foi descartada porque daria mais pontos a alunos que precisaram de mais tentativas para acertar."
+  },
+  {
+    "id": "valores_ausentes_imputacao",
+    "categoria": "Metodologia",
+    "titulo": "Tratamento de Valores Ausentes e Faltosos",
+    "conteudo": "Existe uma distinção rigorosa entre mecanismos de ausência: 1. Alunos Faltosos (fez_teste = 0): A falta decorre de fatores exógenos (doença, transporte). Forçar nota zero nos faltosos subestimaria a proficiência real em 25%. Portanto, faltosos têm escore 'total = NaN' e não entram no cálculo de médias nem no tamanho de efeito. 2. Omissão Parcial de Item em Alunos Presentes (fez_teste = 1): Quando o aluno compareceu mas não respondeu determinado item, o item computa 0.0 (imputação zero conservadora/psicométrica)."
+  },
+  {
+    "id": "tratamento_replicas_fase3",
+    "categoria": "Saneamento Amostral",
+    "titulo": "Detecção e Isolamento de Réplicas no Pós-Teste (Fase 3 TDE II)",
+    "conteudo": "Na Fase 3 do TDE II, planilhas administrativas de monitoria duplicaram vetores inteiros de respostas do pré-teste nas colunas do pós-teste (com taxas de cópia de até 98,8% na Escola Ricardo Vieira). O pipeline de consolidação implementou coalescência cadastral e priorização de provas reais. Registros onde 100% dos itens do pós-teste coincidem com o pré-teste de forma idêntica receberam a flag 'replica_pre = 1' e foram expurgados da formação de pares longitudinais primários. Isso convergiu os pares de TDE de 4.025 para 3.232 pares limpos, atingindo 99,0% de concordância com a referência de auditoria oficial (3.199 pares), eliminando o falso pico de ganho zero (delta = 0)."
+  },
+  {
+    "id": "qualidade_6_dimensoes",
+    "categoria": "Qualidade de Dados",
+    "titulo": "Auditoria das 6 Dimensões da Qualidade",
+    "conteudo": "A base consolidada foi auditada formalmente conforme 6 dimensões de qualidade da informação: 1. Completude: 100% dos itens respondidos nas aplicações válidas dos dois instrumentos. 2. Unicidade: 100% de unicidade por chave (aluno, fase, momento). 3. Validade: 100% dos itens no domínio legal dicotômico (0 ou 1). 4. Consistência: 100% no Vocabulário e 96,5% no TDE II (as réplicas da Fase 3 foram isoladas). 5. Acurácia: 100% de concordância exata entre a soma dos itens e o escore total registrado. 6. Temporalidade: 100% dos registros possuem fase e ciclo cronológico bem definidos (2023.2 a 2024.2)."
+  },
+  {
+    "id": "machine_learning_resultados",
+    "categoria": "Modelagem Preditiva",
+    "titulo": "Resultados de Machine Learning sem Data Leakage",
+    "conteudo": "Foram treinados modelos de Aprendizado de Máquina com validação cruzada agrupada por turmas (GroupKFold com 5 splits sobre 80 turmas de Vocabulário e 85 turmas de TDE II), garantindo zero vazamento de dados entre treino e teste. Modelos de Regressão (Predição do escore pós-intervenção): - Vocabulário: Random Forest Regressor atingiu R² = 0.586 e RMSE = 6.12 (baseline R² = -0.01). - TDE II: Ridge / Random Forest atingiram R² = 0.623 e RMSE = 7.55 (baseline R² = -0.02). A feature mais importante em ambos os modelos é o escore pré-teste (88% a 94% de importância), seguida por idade, fase escolar e zona geográfica. Modelos de Classificação (Risco de baixo ganho / delta <= 0): - Gradient Boosting Classifier no TDE II atingiu ROC-AUC = 0.712 e Acurácia de 65.8% (frente a 53.1% do baseline)."
+  },
+  {
+    "id": "limites_conhecimento",
+    "categoria": "Governança e Limites",
+    "titulo": "Variáveis Ausentes e Limitações do Dataset",
+    "conteudo": "Variáveis NÃO disponíveis no conjunto de dados: 1. Renda familiar, renda per capita ou classe econômica não foram coletadas nas planilhas escolares. 2. Notas bimestrais ou notas de outras disciplinas (matemática, ciências, história) não constam na base. 3. Nome civil completo dos estudantes foi pseudonimizado com identificadores hash (ALUNO_[HEX]) para estrito cumprimento da LGPD e proteção da privacidade dos menores de idade. Caso seja questionado sobre renda ou dados nominais, a IA deve esclarecer que essas informações não existem no dataset."
+  }
+]
