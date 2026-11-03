@@ -151,6 +151,14 @@ TEST_SUITE = [
         "gabarito_esperado": ["0", "nenhum", "41", "faltaram"],
         "termos_obrigatorios": ["0"],
         "criterio": "Deve responder que 0 alunos (nenhum dos 41 alunos matriculados no 6º Período do EJA) responderam ao TDE II."
+    },
+    {
+        "id": "Q18_idade_turma_especifica",
+        "categoria": "Idade por Turma Específica",
+        "pergunta": "Qual a média de idade dos alunos do 6 ano A?",
+        "gabarito_esperado": ["12", "6º ano a", "média"],
+        "termos_obrigatorios": ["12"],
+        "criterio": "Deve responder com objetividade e método a média de idade do 6º ANO A (~12.9 anos)."
     }
 ]
 
@@ -180,9 +188,9 @@ def run_benchmark():
         passou = True
         motivo_falha = []
 
-        if "###" in response or "##" in response:
+        if "###" in response or "##" in response or "===" in response:
             passou = False
-            motivo_falha.append("Presença de cabeçalho '#' proibida na resposta")
+            motivo_falha.append("Presença de cabeçalho '#' ou '===' proibida na resposta")
 
         for termo in test["termos_obrigatorios"]:
             termo_clean = termo.lower().replace(".", "").replace(",", "")

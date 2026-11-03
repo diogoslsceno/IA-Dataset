@@ -25,6 +25,32 @@ Acesse diretamente pelo navegador:
 
 ---
 
+## ⚙️ Requisitos de Hardware e Modos de Operação
+
+O sistema opera de forma desacoplada em dois modos distintos para viabilizar execução em qualquer hardware:
+
+| Componente | Modo Leve / Analítico (Padrão) | Modo Neural Local (Recomendado) | Modo Neural Local (CPU Fallback) |
+| :--- | :--- | :--- | :--- |
+| **Finalidade** | Dashboard Web + Respostas Determinísticas | Síntese de Linguagem Natural (LLM) | Síntese Neural sem GPU Dedicada |
+| **Motor Ativo** | `DataAnalyticsEngine` (Python puro) | Ollama (`llama3.2:3b` Q4_K_M via CUDA/Metal) | Ollama (`llama3.2:3b` via AVX2) |
+| **Processador (CPU)** | 2 Núcleos (Intel Core i3 / Ryzen 3 / ARM) | 4 Núcleos (Intel Core i5 / Ryzen 5) | 4+ Núcleos com AVX2 (i5 8ª ger+ / Ryzen 5) |
+| **Memória RAM** | **2 GB** (Consumo efetivo < 150 MB) | **8 GB** | **8 GB** (Aloca ~2.5 GB para o modelo) |
+| **Placa de Vídeo (GPU)** | **Não requer GPU** | **NVIDIA RTX 3050 (4GB+) / Apple Silicon** | **Não requer GPU** |
+| **VRAM Dedicada** | 0 MB | **Mínimo 3.5 GB a 4 GB** (Modelo ocupa ~2.0 GB) | 0 MB |
+| **Armazenamento** | 250 MB livres | 2.5 GB livres (Base + Pesos do Modelo) | 2.5 GB livres |
+| **Tempo de Resposta** | **< 0,05s** (Instantâneo) | **1,5s a 3,0s** por resposta | **6,0s a 12,0s** por resposta |
+| **Dependências** | Python 3.9+ nativo (zero `pip`) | Python 3.9+ e Ollama instalado | Python 3.9+ e Ollama instalado |
+
+### Como ativar a aceleração por GPU com Ollama:
+1. Instale o Ollama ([ollama.com](https://ollama.com)).
+2. Baixe o modelo neural leve:
+   ```bash
+   ollama pull llama3.2:3b
+   ```
+3. Inicie o serviço com `ollama serve` (ou deixe o Ollama em segundo plano no sistema). O dashboard detecta automaticamente a presença da GPU e ativa a síntese neural fluida. Se o Ollama estiver desligado, o assistente ativa imediatamente o **Modo Analítico Local** sem qualquer quebra de fluxo.
+
+---
+
 ## 📊 Censo Auditado e Indicadores Principais
 
 A auditoria estatística executada sobre as **208 planilhas higienizadas** confirma:
@@ -53,19 +79,14 @@ Desenvolvido segundo os princípios de **Clean Architecture / DDD** com separaç
 
 ---
 
-## 🤖 Assistente de IA WordGen (Llama 3.2 3B Local)
+## 🤖 Assistente de IA WordGen (RAG Híbrido Zero Alucinação)
 
-O painel integra um chatbot conversacional com **RAG Híbrido Semântico-Determinístico (Zero Alucinação)**:
+O painel integra um assistente com arquitetura híbrida de recuperação e resposta:
 
-* **Precisão Matemática e Granularidade por Turma/Instrumento:** Perguntas sobre quantidades, médias de idade, diferenças entre zona urbana e rural, períodos do EJA (`6º`, `7º` e `8º PERIODO (EJA)`) ou cruzamento de provas por turma (`6º ANO A` a `9º ANO G`, incluindo alunos que realizaram **apenas Vocabulário**, **apenas TDE II** ou **ambos os testes**, mesmo com variações de digitação como `"6 sno B"`) são calculadas pela `DataAnalyticsEngine` diretamente sobre os microdados auditados.
-* **Bloqueio Estrito de Escopo (Guardrail) e Formatação Limpa:** Recusa instantaneamente (`0,00s`) perguntas fora do escopo acadêmico do projeto com mensagem concisa, mantendo formatação limpa sem marcações `#`.
-* **Respeito à LGPD e Limites:** Nomes de estudantes são anonimizados (`ALUNO_[HEX]`). Variáveis não coletadas na pesquisa (como renda familiar) são devidamente explicadas.
-* **Operação Resiliente:**
-  * **Com Ollama ativo:** Síntese em linguagem natural fluida utilizando o modelo local `llama3.2:3b`.
-  * **Sem Ollama (Offline):** O assistente ativa automaticamente o **Modo Analítico Local**, apresentando as respostas e estatísticas reais sem interromper o dashboard.
-
-> **Para ativar o modelo neural completo com Ollama:**  
-> Instale o Ollama ([ollama.com](https://ollama.com)) e execute: `ollama run llama3.2:3b`.
+* **Precisão Cirúrgica e Respostas Metódicas:** Consultas pontuais (ex.: *"Qual a média de idade do 6º ANO A?"* ou *"Quantos alunos da turma 6B fizeram apenas Vocabulário?"*) são processadas diretamente pelo `DataAnalyticsEngine`, fornecendo respostas concisas, metódicas e sem dispersão.
+* **Bloqueio de Escopo em 2 Camadas:** Consultas externas ao projeto (ex.: *"Quem descobriu o Brasil?"*) são bloqueadas instantaneamente (`0,00s`) por guardrails algorítmicos.
+* **Anonimização Integral e Conformidade com a LGPD (Art. 14):** Identificadores canônicos criptográficos (`ALUNO_[HEX]`), sem exposição de dados nominais. O repositório completo (inclusive planilhas de origem em `Fases/`) foi auditado e sanitizado, com expurgo total de CPFs, e-mails, telefones e nomes de responsáveis de menores.
+* **Apresentação Limpa:** Formatação higienizada sem marcadores pesados (`###`, `===` ou separadores repetidos).
 
 ---
 
@@ -73,8 +94,12 @@ O painel integra um chatbot conversacional com **RAG Híbrido Semântico-Determi
 
 ```text
 IA - Dataset/
-├── README.md                          <- Manual principal executivo
+├── README.md                          <- Manual principal executivo e guia de hardware
 ├── .gitignore                         <- Bloqueio de arquivos temporários e caches
+├── apresentacao/                      <- Roteiro executivo de vídeo (7min30s) e dossiê de evidências dos 3 trabalhos
+│   ├── README.md                      <- Índice da apresentação
+│   ├── ROTEIRO_VIDEO.md               <- Roteiro completo cronometrado para gravação (Dados -> ML -> IA)
+│   └── EVIDENCIAS_E_PRODUCAO.md       <- Dossiê de evidências empíricas e diretrizes de produção
 ├── Scripts/                           <- Scripts executáveis, inicializadores e dependências
 │   ├── iniciar.sh                     <- Inicializador automático (Linux / macOS)
 │   ├── iniciar.bat                    <- Inicializador automático (Windows)
@@ -82,7 +107,7 @@ IA - Dataset/
 │   ├── environment.yml                <- Configuração de ambiente Conda opcional
 │   ├── preparar_dados_ia.py           <- Gerador da base semântica e estatísticas consolidadas da IA
 │   ├── ia_engine.py                   <- Camada Analítica e orquestrador RAG do Llama 3.2
-│   ├── benchmark_ia.py                <- Bateria de 17 testes de qualidade da IA (100% de acurácia)
+│   ├── benchmark_ia.py                <- Bateria de 18 testes de qualidade da IA (100% de acurácia)
 │   ├── contagem_oficial.py            <- Script autônomo de auditoria de alunos únicos
 │   ├── modelagem_ml.py                <- Pipeline preditivo sem vazamento de dados (GroupKFold)
 │   └── auditoria_6_dimensoes.py       <- Autoavaliação das 6 dimensões de qualidade
@@ -113,15 +138,16 @@ O projeto conta com validação automatizada em duas frentes:
    ```bash
    python3 Scripts/benchmark_ia.py
    ```
-   *100% aprovado (17/17 testes): avalia acurácia de contagem, psicometria, interseção Vocabulário vs. TDE II por turma, participação e idades da EJA/Regular, períodos do EJA, LGPD e bloqueio de escopo.*
+   *100% aprovado (18/18 cenários): avalia acurácia censitária, psicometria, interseção Vocabulário vs. TDE II por turma, participação e idades da EJA/Regular, períodos do EJA, LGPD, bloqueio de escopo e conformidade de formatação.*
 
 ---
 
 ## 📚 Documentação Complementar
 
-Para aprofundamento técnico, consulte os arquivos na pasta **`Contexts/`**:
+Para aprofundamento técnico, consulte os arquivos nas pastas **`Contexts/`** e **`apresentacao/`**:
 
-* 🗺️ [**Roadmap de Execução e Metodologia Unificada**](Contexts/ROADMAP_EXECUCAO.md): Contém todo o histórico de execução, justificativa dos 27 arquivos não avaliativos, desambiguação EJA vs Regular, estratégia de imputação psicométrica, guia de organização das pastas, dicionário de variáveis e modelos de Machine Learning.
+* 🎥 [**Roteiro e Evidências da Apresentação**](apresentacao/README.md): Roteiro cronometrado (7min30s) estruturado para gravação em vídeo, integrando a síntese acadêmica dos 3 trabalhos (Engenharia de Dados, Modelagem de Machine Learning e Assistente de IA) e seu dossiê de evidências empíricas.
+* 🗺️ [**Roadmap de Execução e Metodologia Unificada**](Contexts/ROADMAP_EXECUCAO.md): Histórico completo de execução, justificativa dos 27 arquivos não avaliativos, desambiguação EJA vs Regular, estratégia de imputação psicométrica, guia de organização, dicionário de variáveis e modelos de Machine Learning.
 * 📊 [**Censo de Alunos Únicos**](Contexts/relatorio_alunos_unicos.csv): Tabela dimensional com os 3.016 estudantes auditados.
 * 📋 [**Manifesto de Processamento**](Contexts/manifesto_processamento.csv): Registro de proveniência das 208 planilhas originais do NEES.
 

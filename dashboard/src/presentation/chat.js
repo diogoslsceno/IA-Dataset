@@ -45,6 +45,8 @@ export function initChatWidget() {
 
   function formatText(text) {
     let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html = html.replace(/^\s*=+\s*.*?\s*=*\s*$/gm, '');
+    html = html.replace(/={2,}/g, '');
     html = html.replace(/^\s*#{1,6}\s*(.+?)\s*#*$/gm, '<b>$1</b>');
     html = html.replace(/#{1,6}\s*/g, '');
     html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');

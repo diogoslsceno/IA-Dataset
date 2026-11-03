@@ -297,12 +297,13 @@ A implementação da solução de Inteligência Artificial com Llama 3.2 foi con
 ### 9.1 Diagnóstico de Portabilidade, Isolamento e Padronização Estrutural
 - **Isolamento em Repositório Próprio (`IA - Dataset`):** O projeto foi desacoplado do repositório geral da disciplina e estruturado como um repositório autônomo em `IA - Dataset`, pronto para distribuição independente em `.zip` ou GitHub.
 - **Zero Caminhos Pessoais (`BASE_DIR` relativo):** Todas as referências absolutas foram substituídas por resolução dinâmica baseada em caminhos relativos, garantindo funcionamento em qualquer máquina (Linux, Windows ou macOS).
-- **Centralização Modular (Apenas 5 Pastas na Raiz):**
+- **Centralização Modular (6 Pastas Estruturadas na Raiz):**
   - `Scripts/`: Concentra todos os scripts de automação, motores de IA e arquivos de ambiente (`iniciar.sh`, `iniciar.bat`, `requirements.txt`, `environment.yml`, `ia_engine.py`, `benchmark_ia.py`, `preparar_dados_ia.py`, `contagem_oficial.py`, `modelagem_ml.py`, `auditoria_6_dimensoes.py`).
   - `Contexts/`: Centraliza a documentação unificada (`ROADMAP_EXECUCAO.md`), o censo de estudantes (`relatorio_alunos_unicos.csv`), o livro-razão de proveniência (`manifesto_processamento.csv`) e os arquivos JSON de conhecimento e estatísticas da IA (`base_conhecimento.json` e `estatisticas_consolidadas.json`, eliminando a antiga pasta `ia_context/`).
+  - `apresentacao/`: Concentra o material de comunicação e síntese executiva dos três trabalhos interconectados do projeto (`README.md`, `ROTEIRO_VIDEO.md` com narração cronometrada de 7min30s e `EVIDENCIAS_E_PRODUCAO.md` com o plano de gravação e tabela de evidências empíricas).
   - `dashboard/`: Concentra a aplicação web em Clean Architecture, o servidor integrado (`server_com_chat.py`) e os datasets consolidados finais em `dashboard/data/` (`vocabulario.csv` e `tde.csv`, eliminando a antiga pasta redundante `dashboards/` e economizando 10,1 MB).
   - `Fases/` e `Notebooks/`: Mantêm as 208 planilhas tratadas por fase e os cadernos do Google Colab.
-  - `README.md`: Reformulado como manual executivo conciso e objetivo na raiz do projeto.
+  - `README.md`: Reformulado como manual executivo conciso e objetivo na raiz do projeto com guia de perfis de hardware e modos de operação.
 - **Higienização de Arquivos Temporários:** Expurgo completo de arquivos `.bak`, `.png` de testes, `__pycache__`, `.pyc` e `.ipynb_checkpoints`.
 - **Independência de Ambiente e Resiliência:** O servidor web (`dashboard/server_com_chat.py`) e a camada analítica executam utilizando 100% da biblioteca padrão Python, contando com o endpoint `/api/status` e fallback analítico determinístico caso o Ollama local esteja desligado.
 
@@ -325,16 +326,34 @@ Durante os testes interativos, o catálogo estatístico (`Contexts/estatisticas_
 
 ### 9.3 Refinamentos de Interface, Formatação Limpa e Guardrail de Escopo
 1. **Interface de Chat Livre:** Remoção dos botões de perguntas fixas (*quick chips*) em `dashboard/src/presentation/chat.js`, proporcionando experiência de conversação aberta.
-2. **Eliminação Total de `#` nas Respostas (`clean_markdown_hashes`):** Remoção de cabeçalhos `###` tanto nos blocos de contexto do backend (`Scripts/ia_engine.py`) quanto na renderização HTML do frontend (`chat.js`), convertendo títulos em negrito limpo (`<b>...</b>`).
-3. **Memória de Contexto em Correções (`history`):** Suporte a perguntas de continuação/correção (como *"Eu errei era 8° periodo do EJA"*) sem contaminar mudanças de assunto (como perguntas sobre nomes civis protegidos pela LGPD).
-4. **Bloqueio Estrito de Escopo (Guardrail em 2 Camadas):**
+2. **Eliminação Total de `#` e `===` nas Respostas (`clean_markdown_hashes`):** Remoção de marcadores Markdown pesados (`###`, `===` ou linhas de separadores) tanto nos blocos de contexto analítico do backend (`Scripts/ia_engine.py`) quanto na sanitização do frontend (`chat.js`), garantindo apresentação visual limpa e elegante em negrito (`<b>...</b>`).
+3. **Respostas Cirúrgicas, Metódicas e Objetivas (`generate_direct_answer`):**
+   - Eliminação de despejos extensos de relatórios completos quando o usuário solicita uma métrica pontual (ex.: média de idade de uma turma específica como `6º ANO A`, taxa de participação de um período do EJA, ou correlação psicométrica).
+   - O motor analítico identifica a intenção exata da consulta e produz uma resposta direta, concisa e metódica contendo apenas os dados solicitados, mantendo o aviso de fallback analítico offline quando o Ollama não estiver em execução.
+4. **Memória de Contexto em Correções (`history`):** Suporte a perguntas de continuação/correção (como *"Eu errei era 8° periodo do EJA"*) sem contaminar mudanças de assunto (como perguntas sobre nomes civis protegidos pela LGPD).
+5. **Bloqueio Estrito de Escopo (Guardrail em 2 Camadas):**
    - **Camada 1 (`is_in_domain` no Python):** Bloqueia instantaneamente (`0,00s`) qualquer pergunta fora do universo dos dados acadêmicos do projeto (ex.: *"Quem descobriu o Brasil?"*, curiosidades ou temas alheios), retornando uma mensagem curta e objetiva:
      > *"Pergunta fora do escopo. Respondo apenas dúvidas sobre os dados acadêmicos do projeto **WordGen / NEES** (avaliações, alunos, escolas, turmas, idades e metodologia)."*
    - **Camada 2 (System Prompt):** Diretriz restritiva no prompt do Llama 3.2 impedindo respostas a assuntos externos mesmo quando misturados a termos do projeto.
-5. **Interseção por Instrumento, Turma, Série, EJA e Escola (Tolerante a Erros de Digitação):**
+6. **Interseção por Instrumento, Turma, Série, EJA e Escola (Tolerante a Erros de Digitação):**
    - O `DataAnalyticsEngine` e `Contexts/estatisticas_consolidadas.json` calculam para a rede geral, cada série (`6º` ao `9º ANO`), cada uma das **26 turmas** (ex.: `6º ANO B`, reconhecendo inclusive variações como `"6 sno B"` ou `"6B"`), cada período do EJA (`6º`, `7º` e `8º PERIODO (EJA)`, explicitando `0 alunos` respondentes quando 100% faltaram) e cada escola: total de alunos únicos, avaliados, faltosos, **alunos que realizaram apenas Vocabulário (sem TDE II)**, **apenas TDE II (sem Vocabulário)** e **ambos os testes**, além do desmembramento da turma por escola.
-6. **Benchmark Oficial Ampliado (17 Cenários — 100% de Aprovação):**
-   - A suíte `Scripts/benchmark_ia.py` foi expandida para **17 cenários** (incluindo `Q14_idade_8_periodo_eja`, `Q15_bloqueio_fora_escopo`, `Q16_turma_6b_apenas_vocabulario` e `Q17_eja_6_periodo_tde`), atingindo **17/17 aprovados (100,0% de acurácia)**.
+7. **Benchmark Oficial Ampliado (18 Cenários — 100% de Aprovação):**
+   - A suíte `Scripts/benchmark_ia.py` foi expandida para **18 cenários** (incluindo `Q14_idade_8_periodo_eja`, `Q15_bloqueio_fora_escopo`, `Q16_turma_6b_apenas_vocabulario`, `Q17_eja_6_periodo_tde` e `Q18_idade_turma_especifica`), com validação automatizada de proibição de `===`, atingindo **18/18 aprovados (100,0% de acurácia)**.
+
+### 9.4 Auditoria de Segurança, Blindagem do `.gitignore` e Sanitização LGPD (Art. 14)
+1. **Auditoria de Vulnerabilidades e Código Seguro:**
+   - **Zero Segredos / Credenciais:** Varredura algorítmica comprovou ausência de senhas, chaves privadas, tokens GitHub ou API keys em todo o repositório.
+   - **Zero Injeção / RCE:** Não há utilização de `eval()`, `exec()`, `os.system()` ou subprocessos não tratados.
+   - **Proteção contra Path Traversal / LFI:** O servidor integrado (`server_com_chat.py`) confina requisições estáticas ao diretório `dashboard/`, rejeitando tentativas de fuga de diretório (`404 Not Found`).
+2. **Sanitização Integral de PII nas Planilhas de Origem (`Fases/`):**
+   - **Expurgo de CPFs e E-mails:** Eliminação de **4.202 CPFs** e **3.829 e-mails** no arquivo administrativo da Fase 4 (`3 - NaoProcessados`).
+   - **Expurgo de Filiação e Contatos Pessoais:** Remoção de **2.010 nomes civis de responsáveis** em `RelaçãoCompletaAlunos.csv` e sanitização da coluna `Responsável Legal` em **100 planilhas avaliativas**, além da eliminação de telefones, endereços, RG, SUS e NIS.
+   - **Total de Células Sensíveis Expurgadas:** **75.967 células** sanitizadas em 101 arquivos.
+   - **Preservação Estrutural:** Mantida a integridade exata de colunas, delimitadores e codificação UTF-8, garantindo que o censo de **3.016 alunos únicos** permaneça 100% íntegro e auditado por `Scripts/contagem_oficial.py`.
+3. **Completude e Blindagem do `.gitignore`:**
+   - O arquivo `.gitignore` foi expandido e categorizado para cobrir artefatos de compilação Python (`__pycache__`, `.pyc`), dependências de frontend (`node_modules/`, logs), caches de testes (`.pytest_cache/`, `.coverage`), notebooks (`.ipynb_checkpoints/`), editores (`.vscode/`, `.idea/`) e metadados de sistema (`.DS_Store`, `Thumbs.db`), com proteção explícita da pasta de distribuição estática (`!dashboard/dist/`).
+4. **Prontidão para Versionamento e Commits Semânticos:**
+   - Repositório integralmente auditado, validado nos testes unitários e psicométricos, higienizado contra vazamentos de dados pessoais e alinhado ao Guia de Commits Semânticos do projeto.
 
 
 ---
@@ -532,6 +551,11 @@ A pasta centraliza todas as fases tratadas dentro do subdiretório `Fases/`, scr
 * `relatorio_alunos_unicos.csv`: Tabela dimensional oficial com a ficha cadastral de cada um dos 3.016 alunos únicos.
 * `base_conhecimento.json`: Base semântica estruturada em tópicos metodológicos e psicométricos para o RAG da IA.
 * `estatisticas_consolidadas.json`: Catálogo estatístico auditado completo (rede, fases, escolas, séries, períodos EJA, turmas e interseções de instrumentos) para consulta determinística da IA.
+
+### `apresentacao/`
+* `README.md`: Índice e escopo da apresentação dos 3 trabalhos integrados.
+* `ROTEIRO_VIDEO.md`: Roteiro cronometrado (7min30s) para gravação em vídeo acadêmico (Trabalho 1: Dados e Painel $\rightarrow$ Trabalho 2: Modelagem Preditiva $\rightarrow$ Trabalho 3: Assistente de IA Local).
+* `EVIDENCIAS_E_PRODUCAO.md`: Dossiê de evidências empíricas, dados estatísticos conferidos e plano detalhado de produção e gravação de tela.
 
 ---
 

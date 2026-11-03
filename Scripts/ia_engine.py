@@ -159,7 +159,7 @@ class DataAnalyticsEngine:
                 "- Portanto, não é possível consultar estudantes pelo nome civil, apenas analisar os 3.016 estudantes únicos de forma anonimizada."
             )
             if not any(t in q_curr for t in ["idade", "eja", "nota", "média", "media", "escola", "turma", "zona"]):
-                return "=== DADOS ESTATÍSTICOS AUDITADOS DO PROJETO ===\n" + "\n\n".join(facts_blocks)
+                return "**Dados Estatísticos Auditados do Projeto**\n\n" + "\n\n".join(facts_blocks)
 
         # -------------------------------------------------------------
         # 1. Checagem de Variáveis Ausentes / Não Coletadas
@@ -425,36 +425,313 @@ class DataAnalyticsEngine:
 
         context_parts = []
         if facts_blocks:
-            context_parts.append("=== DADOS ESTATÍSTICOS AUDITADOS DO PROJETO ===\n" + "\n\n".join(facts_blocks))
+            context_parts.append("**Dados Estatísticos Auditados do Projeto**\n\n" + "\n\n".join(facts_blocks))
         if methodology_blocks:
-            context_parts.append("=== CONTEXTO METODOLÓGICO E PSICOMÉTRICO ===\n" + "\n\n".join(methodology_blocks))
+            context_parts.append("**Contexto Metodológico e Psicométrico**\n\n" + "\n\n".join(methodology_blocks))
 
         return "\n\n".join(context_parts)
+
+    def generate_direct_answer(self, query: str, history: list[dict] | None = None) -> str:
+        """Gera uma síntese analítica metódica, concisa e direta para a pergunta do usuário."""
+        q_curr = query.lower()
+        is_followup = any(k in q_curr for k in ["errei", "quis dizer", "na verdade", "e no ", "e na ", "e do ", "e da ", "e o ", "e a ", "e sobre"]) or len(q_curr.split()) <= 5
+        combined_text = query
+        if history and is_followup:
+            user_hist = [m.get("content", "") for m in history if m.get("role") == "user"]
+            if user_hist:
+                combined_text = user_hist[-1] + " " + query
+        q_lower = combined_text.lower()
+
+        # 1. Nomes Pessoais / LGPD
+        privacy_terms = ["chamado", "chamada", "nome", "sobrenome", "joão", "joao", "maria", "silva", "santos",
+                         "cpf", "rg", " matrícula", "matricula", "identidade", "anonimiz", "lgpd", "pessoal"]
+        if any(term in q_curr for term in privacy_terms) and not any(t in q_curr for t in ["idade", "eja", "nota", "média", "media", "quantos"]):
+            return (
+                "**Proteção de Dados Pessoais e Anonimização (LGPD)**\n\n"
+                "Em estrito cumprimento à Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) e à proteção de menores, "
+                "nenhum nome civil consta na base de dados. Todos os estudantes são identificados por códigos canônicos irreversíveis "
+                "em hash hexadecimal no formato `ALUNO_[16 dígitos HEX]`."
+            )
+
+        # 2. Variáveis Ausentes (Renda, Salário, etc.)
+        missing_terms = ["renda", "salário", "salario", "dinheiro", "financeir", "classe social", 
+                         "classe econômica", "classe economica", "profissão", "profissao",
+                         "matemática", "matematica", "ciências", "ciencias", "história", "historia"]
+        if any(term in q_lower for term in missing_terms):
+            return (
+                "**Informação sobre Variáveis da Pesquisa**\n\n"
+                "A variável consultada (renda familiar, classe socioeconômica ou outras disciplinas escolares) "
+                "**não foi coletada** nos instrumentos do projeto WordGen / NEES.\n\n"
+                "O projeto concentrou-se na avaliação de proficiência linguística (Vocabulário e TDE II) "
+                "e em atributos demográficos cadastrais (Idade, Sexo, Cor/Raça, Modalidade de Ensino e Zona Escolar)."
+            )
+
+        # Extração de Turmas, Séries e EJA
+        curr_turmas, curr_series, curr_eja = self._extract_turmas_series(query)
+        comb_turmas, comb_series, comb_eja = self._extract_turmas_series(combined_text)
+        matched_turmas = curr_turmas or comb_turmas
+        matched_series = curr_series or comb_series
+        matched_eja = curr_eja or comb_eja
+
+        turmas_all = self.stats.get("demografia", {}).get("idade", {}).get("por_turma", {})
+        periodos_eja_all = self.stats.get("demografia", {}).get("idade", {}).get("por_periodo_eja", {})
+
+        # 3. Turma Específica do Regular (ex: 6º ANO A, 6º ANO B)
+        if matched_turmas:
+            t_nome = matched_turmas[0]
+            t_info = turmas_all.get(t_nome)
+            if t_info:
+                # Pergunta sobre idade
+                if any(t in q_lower for t in ["idade", "anos", "faixa", "velho", "jovem"]):
+                    return (
+                        f"**Média de Idade — {t_nome}**\n\n"
+                        f"A média de idade dos alunos do **{t_nome}** é de **{t_info['idade_media']} anos** "
+                        f"(mediana: {t_info['idade_mediana']} anos; faixa etária: de {t_info['idade_minima']} a {t_info['idade_maxima']} anos; "
+                        f"desvio padrão: {t_info['idade_desvio_padrao']} anos).\n\n"
+                        f"Total de alunos únicos cadastrados na turma: **{t_info['alunos_unicos']} alunos** (distribuídos em {t_info['escolas_unicas']} escolas)."
+                    )
+                # Pergunta sobre apenas Vocabulário
+                if any(t in q_lower for t in ["apenas", "só", "so ", "somente"]) and any(t in q_lower for t in ["vocab", "vocabulário", "vocabulario"]):
+                    return (
+                        f"**Participação em Vocabulário — {t_nome}**\n\n"
+                        f"No **{t_nome}**, exatamente **{t_info['alunos_apenas_vocab']} alunos** realizaram apenas o teste de Vocabulário (sem realizar o TDE II).\n\n"
+                        f"Ao todo, **{t_info['alunos_vocab_total']} alunos** da turma realizaram o teste de Vocabulário (sendo {t_info['alunos_ambos_testes']} que fizeram ambos os testes)."
+                    )
+                # Pergunta sobre apenas TDE
+                if any(t in q_lower for t in ["apenas", "só", "so ", "somente"]) and any(t in q_lower for t in ["tde", "escrita"]):
+                    return (
+                        f"**Participação no TDE II — {t_nome}**\n\n"
+                        f"No **{t_nome}**, exatamente **{t_info['alunos_apenas_tde']} alunos** realizaram apenas o teste de TDE II (sem realizar o Vocabulário).\n\n"
+                        f"Ao todo, **{t_info['alunos_tde_total']} alunos** da turma responderam ao teste de TDE II (sendo {t_info['alunos_ambos_testes']} que fizeram ambos os testes)."
+                    )
+                # Pergunta sobre quantos responderam Vocabulário
+                if any(t in q_lower for t in ["vocab", "vocabulário", "vocabulario"]) and any(t in q_lower for t in ["quantos", "responderam", "fizeram", "avaliados", "provas", "total"]):
+                    return (
+                        f"**Participação em Vocabulário — {t_nome}**\n\n"
+                        f"No **{t_nome}**, **{t_info['alunos_vocab_total']} alunos únicos** responderam ao teste de Vocabulário "
+                        f"({t_info['alunos_apenas_vocab']} apenas Vocabulário e {t_info['alunos_ambos_testes']} em ambos os testes), "
+                        f"totalizando {t_info['vocab_avaliacoes']} avaliações aplicadas (média: {t_info['vocab_media']} pontos)."
+                    )
+                # Pergunta sobre quantos responderam TDE
+                if any(t in q_lower for t in ["tde", "escrita"]) and any(t in q_lower for t in ["quantos", "responderam", "fizeram", "avaliados", "provas", "total"]):
+                    return (
+                        f"**Participação no TDE II — {t_nome}**\n\n"
+                        f"No **{t_nome}**, **{t_info['alunos_tde_total']} alunos únicos** responderam ao teste de TDE II "
+                        f"({t_info['alunos_apenas_tde']} apenas TDE II e {t_info['alunos_ambos_testes']} em ambos os testes), "
+                        f"totalizando {t_info['tde_avaliacoes']} avaliações aplicadas (média: {t_info['tde_media']} pontos)."
+                    )
+                # Pergunta geral sobre a turma
+                return (
+                    f"**Resumo da Turma {t_nome}**\n\n"
+                    f"- **Alunos Únicos:** {t_info['alunos_unicos']} cadastrados ({t_info['alunos_avaliados']} avaliados e {t_info['alunos_faltosos']} faltosos em todas as provas)\n"
+                    f"- **Média de Idade:** {t_info['idade_media']} anos (faixa: {t_info['idade_minima']} a {t_info['idade_maxima']} anos)\n"
+                    f"- **Vocabulário:** {t_info['alunos_vocab_total']} alunos avaliados ({t_info['alunos_apenas_vocab']} apenas Vocabulário) | média: {t_info['vocab_media']} pontos\n"
+                    f"- **TDE II:** {t_info['alunos_tde_total']} alunos avaliados ({t_info['alunos_apenas_tde']} apenas TDE II) | média: {t_info['tde_media']} pontos"
+                )
+
+        # 4. Período do EJA (6º, 7º ou 8º Período EJA)
+        if matched_eja:
+            p_nome = matched_eja[0]
+            p_info = periodos_eja_all.get(p_nome)
+            if p_info:
+                # Pergunta sobre responder teste / provas
+                if any(t in q_lower for t in ["responderam", "fizeram", "teste", "prova", "tde", "vocab", "avalia"]):
+                    inst = "TDE II" if "tde" in q_lower else ("Vocabulário" if "vocab" in q_lower else "Vocabulário e TDE II")
+                    return (
+                        f"**Participação nas Avaliações — {p_nome}**\n\n"
+                        f"**0 alunos (nenhum aluno)** do **{p_nome}** responderam ao teste de {inst}.\n\n"
+                        f"Todos os **{p_info['alunos_unicos']} alunos** cadastrados na turma faltaram à aplicação das provas (`fez_teste = 0`) na Fase 2."
+                    )
+                # Pergunta sobre idade
+                return (
+                    f"**Média de Idade — {p_nome}**\n\n"
+                    f"No **{p_nome}**, a média de idade é de **{p_info['idade_media']} anos** "
+                    f"(mediana: {p_info['idade_mediana']} anos; desvio padrão: {p_info['idade_desvio_padrao']} anos; faixa etária: de {p_info['idade_minima']} a {p_info['idade_maxima']} anos).\n\n"
+                    f"Total de alunos únicos matriculados: **{p_info['alunos_unicos']} alunos** (distribuídos em {p_info['turmas_escolas']} escolas)."
+                )
+
+        # 5. EJA Geral
+        if "eja" in q_lower:
+            demo_idade = self.stats.get("demografia", {}).get("idade", {})
+            eja_info = demo_idade.get("eja", {})
+            if any(t in q_lower for t in ["responderam", "fizeram", "teste", "prova", "tde", "vocab", "avalia"]):
+                return (
+                    "**Participação nas Avaliações — Modalidade EJA**\n\n"
+                    "**0 alunos (nenhum aluno)** do EJA responderam às provas de Vocabulário ou TDE II.\n\n"
+                    "Todos os 125 estudantes cadastrados no EJA na Fase 2 faltaram às aplicações das avaliações (`fez_teste = 0`)."
+                )
+            return (
+                "**Média de Idade — Modalidade EJA**\n\n"
+                f"A média de idade dos estudantes do **EJA** é de **{eja_info.get('media', 29.96)} anos** (~30 anos), "
+                f"com mediana de {eja_info.get('mediana', 26.0)} anos (faixa etária: de {eja_info.get('minima', 16)} a {eja_info.get('maxima', 60)} anos; "
+                f"desvio padrão: {eja_info.get('desvio_padrao', 11.91)} anos), totalizando **{eja_info.get('alunos_unicos', 125)} estudantes únicos** cadastrados."
+            )
+
+        # 6. Série / Ensino Regular
+        if matched_series:
+            s_nome = matched_series[0]
+            s_info = self.stats.get("demografia", {}).get("idade", {}).get("por_serie_ano", {}).get(s_nome, {})
+            if s_info:
+                if any(t in q_lower for t in ["idade", "anos", "faixa", "velho", "jovem"]):
+                    return (
+                        f"**Média de Idade — {s_nome}**\n\n"
+                        f"No **{s_nome}**, a média de idade é de **{s_info.get('idade_media')} anos** "
+                        f"(mediana: {s_info.get('idade_mediana')} anos; faixa etária: de {s_info.get('idade_minima')} a {s_info.get('idade_maxima')} anos), "
+                        f"totalizando **{s_info.get('alunos_unicos')} alunos únicos** cadastrados."
+                    )
+                return (
+                    f"**Resumo do {s_nome}**\n\n"
+                    f"- **Alunos Únicos:** {s_info.get('alunos_unicos')} cadastrados ({s_info.get('alunos_avaliados')} avaliados e {s_info.get('alunos_faltosos')} faltosos)\n"
+                    f"- **Média de Idade:** {s_info.get('idade_media')} anos\n"
+                    f"- **Vocabulário:** {s_info.get('alunos_vocab_total')} alunos | média: {s_info.get('vocab_media')} pontos\n"
+                    f"- **TDE II:** {s_info.get('alunos_tde_total')} alunos | média: {s_info.get('tde_media')} pontos"
+                )
+
+        if "regular" in q_lower:
+            reg_info = self.stats.get("demografia", {}).get("idade", {})["regular"]
+            dist_pct = self.stats.get("demografia", {}).get("distorcao_idade_serie_regular_pct", 10.03)
+            return (
+                "**Média de Idade — Ensino Regular**\n\n"
+                f"A média de idade dos estudantes do **Ensino Regular** é de **{reg_info.get('media', 14.14)} anos** (~14 anos), "
+                f"com mediana de {reg_info.get('mediana', 14.0)} anos (faixa etária: de {reg_info.get('minima', 10)} a {reg_info.get('maxima', 35)} anos; "
+                f"desvio padrão: {reg_info.get('desvio_padrao', 2.04)} anos) para um total de **{reg_info.get('alunos_unicos', 2891)} estudantes**.\n\n"
+                f"Taxa de distorção idade-série no Regular: {dist_pct}% dos alunos têm defasagem >= 2 anos."
+            )
+
+        # 7. Machine Learning / R² / Modelos Preditivos
+        if any(t in q_lower for t in ["machine learning", "r2", "r²", "feature", "modelo", "rmse", "auc", "predit"]):
+            return (
+                "**Modelagem Preditiva (Machine Learning)**\n\n"
+                "Os modelos de regressão treinados com validação cruzada agrupada por turmas (`GroupKFold`, sem vazamento de dados) atingiram:\n\n"
+                "- **TDE II:** R² = 0,623 (RMSE = 7,55)\n"
+                "- **Vocabulário:** R² = 0,586 (RMSE = 6,12)\n\n"
+                "A feature mais importante em ambos os modelos é o **escore do pré-teste** (respondendo por 88% a 94% da importância preditiva), seguida por idade e zona escolar."
+            )
+
+        # 8. Distribuição de Delta / Melhora / Estabilidade / Regressão de Escore
+        if any(t in q_lower for t in ["melhora", "estabilidade", "delta", "distribuição", "distribuicao"]) or ("regress" in q_lower and any(a in q_lower for a in ["aluno", "desempenho", "ganho", "nota"])):
+            v = self.stats.get("vocabulario", {})
+            n = v.get("total_pares_limpos", 3456)
+            g = v.get("ganho_alunos", 1820)
+            e = v.get("estavel_alunos", 280)
+            q = v.get("queda_alunos", 1356)
+            return (
+                "**Distribuição dos Pares de Vocabulário (3.456 pares)**\n\n"
+                f"- **Melhora / Ganho (delta > 0):** {g/n*100:.1f}% ({g} alunos)\n"
+                f"- **Estabilidade (delta = 0):** {e/n*100:.1f}% ({e} alunos)\n"
+                f"- **Regressão / Queda (delta < 0):** {q/n*100:.1f}% ({q} alunos)"
+            )
+
+        # 9. Censo Geral de Alunos Únicos
+        if any(t in q_lower for t in ["censo", "alunos únicos", "alunos unicos", "total de alunos", "quantos alunos"]):
+            c = self.stats.get("censo", {})
+            return (
+                "**Censo Geral de Alunos Únicos**\n\n"
+                f"Foram identificados **{c.get('total_alunos_unicos', 3016)} alunos únicos** cadastrados no censo geral de avaliações do projeto WordGen / NEES.\n\n"
+                f"- **Alunos Avaliados (ao menos 1 prova):** {c.get('alunos_avaliados', 2673)} estudantes (88,6%)\n"
+                f"- **Alunos Ausentes em Todas as Provas:** {c.get('alunos_faltosos', 343)} estudantes (11,4%)\n"
+                f"- **Turmas Únicas:** {c.get('turmas_vocabulario', 80)} turmas em Vocabulário e {c.get('turmas_tde', 85)} no TDE II\n"
+                f"- **Escolas Participantes:** {c.get('escolas_unicas', 13)} unidades escolares"
+            )
+
+        # 9. Pares Pré e Pós / Desempenho
+        if any(t in q_lower for t in ["pares", "paread"]) and any(t in q_lower for t in ["vocab", "vocabulário", "vocabulario"]):
+            v = self.stats.get("vocabulario", {})
+            return (
+                "**Pares Completos — Vocabulário**\n\n"
+                f"O total é de **{v.get('total_pares_limpos', 3456)} pares completos** pré e pós-teste no instrumento de Vocabulário.\n\n"
+                f"- Média Pré-teste: {v.get('media_pre', 21.99)} pontos\n"
+                f"- Média Pós-teste: {v.get('media_pos', 23.87)} pontos\n"
+                f"- Variação Média (Delta): +{v.get('delta_medio', 1.88)} pontos\n"
+                f"- Tamanho do Efeito (Cohen's dz): {v.get('cohen_dz', 0.30)}"
+            )
+
+        if any(t in q_lower for t in ["pares", "paread"]) and any(t in q_lower for t in ["tde", "escrita"]):
+            t = self.stats.get("tde", {})
+            return (
+                "**Pares Consolidados — TDE II**\n\n"
+                f"Após o isolamento de réplicas, foram consolidados **{t.get('total_pares_limpos', 3232)} pares legítimos** no TDE II.\n\n"
+                f"- Média Pré-teste: {t.get('media_pre', 25.12)} pontos\n"
+                f"- Média Pós-teste: {t.get('media_pos', 27.24)} pontos\n"
+                f"- Variação Média (Delta): +{t.get('delta_medio', 2.12)} pontos\n"
+                f"- Tamanho do Efeito (Cohen's dz): {t.get('cohen_dz', 0.32)}"
+            )
+
+        # 10. Regra Psicométrica / Escala de Pontuação / Tentativas
+        if any(t in q_lower for t in ["pontua", "tentativa", "código", "codigo", "escala", "dicot"]):
+            return (
+                "**Regra Psicométrica de Pontuação (Escala Dicotômica Unificada)**\n\n"
+                "A pontuação dos itens no Vocabulário e TDE II é dicotômica (0 e 1):\n\n"
+                "- **Nota 0:** Resposta incorreta ou item deixado em branco por aluno presente.\n"
+                "- **Nota 1:** Qualquer acerto (seja na primeira ou em tentativas posteriores).\n\n"
+                "A soma bruta de códigos de tentativas foi descartada porque beneficiaria indevidamente alunos que precisaram de mais tentativas para acertar."
+            )
+
+        # 11. Tratamento de Faltosos
+        if any(t in q_lower for t in ["falta", "faltoso", "nota zero", "ausente"]):
+            return (
+                "**Tratamento de Alunos Faltosos**\n\n"
+                "Os alunos faltosos (`fez_teste = 0`) **não receberam nota zero**.\n\n"
+                "Como a falta decorre de fatores exógenos (doença, transporte), forçar nota zero subestimaria a proficiência real em ~25%. "
+                "Por isso, faltosos mantêm escore `total = NaN` e não entram no cálculo de médias nem no tamanho de efeito."
+            )
+
+        # 12. Réplicas da Fase 3
+        if any(t in q_lower for t in ["réplica", "replica", "cópia", "copia"]):
+            return (
+                "**Anomalia das Réplicas na Fase 3 do TDE II**\n\n"
+                "Planilhas administrativas de monitoria da Fase 3 do TDE II continham cópias em bloco de respostas do pré-teste duplicadas nas colunas do pós-teste.\n\n"
+                "O pipeline de consolidação identificou esses casos: registros com cópia idêntica (100% de itens coincidentes) receberam a flag `replica_pre = 1` "
+                "e foram isolados dos pares primários, convergindo para **3.232 pares limpos** (99,0% de concordância com a auditoria de referência)."
+            )
+
+        # 13. Zona Urbana vs. Rural
+        if any(t in q_lower for t in ["zona", "urbana", "rural"]):
+            z = self.stats.get("demografia", {}).get("zona", {})
+            u = z.get("urbana", {})
+            r = z.get("rural", {})
+            return (
+                "**Comparativo por Localização (Zona Urbana vs. Rural)**\n\n"
+                f"- **Vocabulário (0–50):** Zona Urbana teve média de **{u.get('vocab_media', 22.92)} pontos** ({u.get('vocab_avaliados', 4506)} avaliações) vs. **{r.get('vocab_media', 22.76)} pontos** na Zona Rural ({r.get('vocab_avaliados', 3236)} avaliações) — diferença de +0,16 pontos.\n"
+                f"- **TDE II (0–40):** Zona Urbana teve média de **{u.get('tde_media', 26.56)} pontos** ({u.get('tde_avaliados', 4724)} avaliações) vs. **{r.get('tde_media', 25.06)} pontos** na Zona Rural ({r.get('tde_avaliados', 3689)} avaliações) — diferença de +1,50 pontos."
+            )
+
+        # Fallback genérico dos blocos recuperados
+        context = self.retrieve_context(query, history)
+        return context
 
     def build_system_prompt(self, context_text: str) -> str:
         return (
             "Você é o Assistente Especialista em Inteligência Artificial e Avaliação Educacional "
             "do projeto WordGen / NEES (IA - Dataset).\n"
-            "Sua missão é responder com máxima precisão, clareza e fundamentação técnica às dúvidas do usuário.\n\n"
+            "Sua missão é responder com máxima precisão, clareza, objetividade e fundamentação técnica às dúvidas do usuário.\n\n"
             "DIRETRIZES DE RESPOSTA:\n"
-            "1. PRECISÃO MATEMÁTICA E PROIBIÇÃO DE ESTIMATIVAS INVENTADAS: Utilize estritamente os dados estatísticos "
+            "1. OBJETIVIDADE E RESPOSTA METÓDICA: Responda diretamente e com precisão cirúrgica ao que o usuário perguntou. "
+            "Se o usuário fez uma pergunta pontual (como média de idade de uma turma ou série, quantidade de alunos em uma prova, "
+            "contagem de pares de um teste ou um indicador específico), informe o dado solicitado de forma clara, metódica e concisa, "
+            "sem despejar tabelas longas ou estatísticas não solicitadas. Ao ser perguntado sobre a contagem final ou total de pares pré e pós, "
+            "informe explicitamente o total de pares limpos consolidados (3.456 pares no Vocabulário e 3.232 pares limpos no TDE II). "
+            "Se a pergunta for ampla, organize a resposta em tópicos curtos e objetivos.\n"
+            "2. PROIBIÇÃO ABSOLUTA DE '===': NUNCA utilize os caracteres '===' ou sequências de sinais de igual em suas respostas, "
+            "cabeçalhos ou destaques.\n"
+            "3. PRECISÃO MATEMÁTICA E PROIBIÇÃO DE ESTIMATIVAS INVENTADAS: Utilize estritamente os dados estatísticos "
             "reais auditados apresentados no CONTEXTO abaixo. NUNCA tente 'estimar' ou inventar médias aproximadas por conta própria.\n"
-            "2. IDADE, MODALIDADE, PERÍODOS DO EJA E PARTICIPAÇÃO NOS TESTES: O dataset possui todos os dados exatos por modalidade, período do EJA e turma:\n"
+            "4. IDADE, MODALIDADE, PERÍODOS DO EJA E PARTICIPAÇÃO NOS TESTES: O dataset possui todos os dados exatos por modalidade, período do EJA e turma:\n"
             "   - EJA Geral: 125 alunos únicos matriculados, média de idade de 29,96 anos (~30 anos), faixa de 16 a 60 anos. **0 alunos responderam ao Vocabulário e 0 alunos responderam ao TDE II** (todos os 125 alunos faltaram às provas, fez_teste = 0).\n"
             "   - 6º PERIODO (EJA): 41 alunos únicos matriculados (em 4 escolas), média de idade de 37,83 anos (mediana 37,0; mín 18, máx 60; DP 12,69). **0 alunos responderam ao TDE II e 0 alunos responderam ao Vocabulário** (todos os 41 alunos faltaram à prova).\n"
             "   - 7º PERIODO (EJA): 43 alunos únicos matriculados (em 4 escolas), média de idade de 28,07 anos (mediana 24,0; mín 16, máx 60; DP 10,35). **0 alunos responderam ao TDE II e 0 alunos responderam ao Vocabulário** (todos os 43 alunos faltaram à prova).\n"
             "   - 8º PERIODO (EJA): 41 alunos únicos matriculados em 2 escolas (EMEB Professor Ricardo Vieira de Lima com 37 alunos e EMEB Natanael da Silva com 4 alunos), média de idade de 24,07 anos (mediana 21,0; mín 17, máx 46; DP 7,99). **0 alunos responderam ao TDE II e 0 alunos responderam ao Vocabulário** (todos os 41 alunos faltaram à prova).\n"
             "   - REGRA CRÍTICA PARA O EJA: Se o usuário perguntar quantos alunos do EJA (ou do 6º, 7º ou 8º Período do EJA) responderam/fizeram o TDE II ou o Vocabulário, NUNCA diga que 'não há informações disponíveis'. Responda diretamente que **0 alunos (nenhum aluno)** daquele período do EJA responderam ao teste, pois todos os alunos matriculados na turma faltaram no dia da aplicação.\n"
             "   - Ensino Regular Geral: 2.891 alunos únicos, média de 14,14 anos (6º ANO: 12,50 anos; 7º ANO: 13,58 anos; 8º ANO: 14,53 anos; 9º ANO: 15,39 anos).\n"
-            "3. GRANULARIDADE POR TURMA, SÉRIE, ESCOLA E INSTRUMENTO: O dataset possui todos os dados exatos por turma (ex: 6º ANO A, 6º ANO B, etc.), série e escola, incluindo quantos alunos únicos realizaram APENAS Vocabulário (sem TDE II), APENAS TDE II (sem Vocabulário), AMBOS os testes, o total de alunos avaliados em cada instrumento e os faltosos. NUNCA diga que o projeto não fornece detalhes por turma ou por prova. Sempre responda citando os números exatos do bloco da turma/série/escola consultada.\n"
-            "4. VARIÁVEIS NÃO COLETADAS: Se o usuário perguntar sobre renda familiar, classe socioeconômica ou outras disciplinas, "
+            "5. GRANULARIDADE POR TURMA, SÉRIE, ESCOLA E INSTRUMENTO: O dataset possui todos os dados exatos por turma (ex: 6º ANO A, 6º ANO B, etc.), série e escola, incluindo quantos alunos únicos realizaram APENAS Vocabulário (sem TDE II), APENAS TDE II (sem Vocabulário), AMBOS os testes, o total de alunos avaliados em cada instrumento e os faltosos. NUNCA diga que o projeto não fornece detalhes por turma ou por prova. Sempre responda citando os números exatos do bloco da turma/série/escola consultada.\n"
+            "6. VARIÁVEIS NÃO COLETADAS: Se o usuário perguntar sobre renda familiar, classe socioeconômica ou outras disciplinas, "
             "esclareça educadamente que essas variáveis NÃO foram coletadas nos questionários escolares da pesquisa, "
             "mas que os dados demográficos de idade, sexo, cor/raça, modalidade e zona estão disponíveis.\n"
-            "5. PRIVACIDADE E LGPD: Os nomes civis completos dos alunos foram substituídos pelo identificador canônico ALUNO_[HEX] "
+            "7. PRIVACIDADE E LGPD: Os nomes civis completos dos alunos foram substituídos pelo identificador canônico ALUNO_[HEX] "
             "em conformidade com a LGPD.\n"
-            "6. FORMATAÇÃO LIMPA (SEM '#'): NUNCA utilize o símbolo '#' (como #, ##, ### ou ####) em suas respostas. "
+            "8. FORMATAÇÃO LIMPA (SEM '#'): NUNCA utilize o símbolo '#' (como #, ##, ### ou ####) em suas respostas. "
             "Para títulos, subtítulos e destaques, utilize exclusivamente texto em negrito (**Título**).\n"
-            "7. BLOQUEIO ESTRITO DE ESCOPO: Você é estritamente proibido de responder perguntas sobre história geral, geografia, "
+            "9. BLOQUEIO ESTRITO DE ESCOPO: Você é estritamente proibido de responder perguntas sobre história geral, geografia, "
             "política, esportes, receitas, programação genérica ou qualquer assunto que não diga respeito aos dados acadêmicos "
             "do projeto WordGen / NEES. Caso o usuário misture um assunto externo, recuse o assunto externo.\n\n"
             f"{context_text}"
@@ -462,12 +739,17 @@ class DataAnalyticsEngine:
 
 
 def clean_markdown_hashes(text: str) -> str:
-    """Remove qualquer marcação '#' de cabeçalho Markdown, convertendo em negrito limpo."""
+    """Remove qualquer marcação '#' de cabeçalho Markdown e caracteres '==='."""
     # Converte linhas iniciadas com #, ##, ###, etc. em **Título**
     cleaned = re.sub(r"(?m)^\s*#{1,6}\s*(.+?)\s*#*$", lambda m: f"**{m.group(1).strip('* ')}**", text)
     # Remove eventuais sequências de ### soltas no meio do texto
     cleaned = re.sub(r"#{2,}\s*", "", cleaned)
-    return cleaned
+    # Remove delimitadores de destaque com ===
+    cleaned = re.sub(r"(?m)^\s*=+\s*.*?\s*=*\s*$", "", cleaned)
+    cleaned = re.sub(r"={2,}", "", cleaned)
+    # Remove quebras de linha triplas
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
 
 
 class LlamaChatEngine:
@@ -531,9 +813,10 @@ class LlamaChatEngine:
                 return clean_markdown_hashes(data["message"]["content"])
         except Exception:
             # Fallback determinístico de alta fidelidade caso o Ollama esteja offline ou não instalado
+            direct_ans = self.analytics_engine.generate_direct_answer(question, history)
             return clean_markdown_hashes(
                 "*(Serviço Ollama / Llama 3.2 local offline. Resposta gerada diretamente pela Camada Analítica de Dados do Projeto):*\n\n"
-                f"{context}"
+                f"{direct_ans}"
             )
 
 

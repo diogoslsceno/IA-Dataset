@@ -1,24 +1,92 @@
-# Byte-compiled / optimized / DLL files
+# ==============================================================================
+# .gitignore — IA - Dataset (WordGen / NEES)
+# ==============================================================================
+
+# --- Byte-compiled / Optimized / Python Artifacts ---
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Caches and checkpoints
-.ipynb_checkpoints/
-.pytest_cache/
+# GARANTIA: O frontend estático está em dashboard/dist/ e NÃO deve ser ignorado!
+!dashboard/dist/
+!dashboard/dist/**
 
-# Virtual Environments
+# --- Ambientes Virtuais e Gerenciadores de Pacote ---
 .env
+.env.*
+!.env.example
 .venv/
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
+.conda/
 
-# Temporary files & backups
-*.bak
-*.tmp
+# --- Node.js & NPM (Testes e Dependências Web) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Caches de Testes e Linters ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# --- Jupyter Notebooks & Google Colab ---
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# --- Logs e Arquivos de Depuração ---
+*.log
+*.sqlite
+*.sqlite3
+
+# --- Editores e IDEs ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
 *~
 
-# OS specific files
+# --- Arquivos do Sistema Operacional ---
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
+
+# --- Arquivos Temporários, Backups e Imagens de Debug ---
+*.bak
+*.tmp
+*.temp
+Contexts/*.png
